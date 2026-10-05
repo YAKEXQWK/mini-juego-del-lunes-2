@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎃 Escape Room: Edición Halloween Definitiva 🦇</title>
+    <style>
+        :root {
+            --bg-color: #09090b;
+            --text-color: #f8fafc;
+            --accent-color: #7c3aed;
+            --box-bg: #18181b;
+            --success-color: #10b981;
+            --lock-color: #f59e0b;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding: 10px;
+            box-sizing: border-box;
+            background-image: radial-gradient(circle at 50% 20%, #2e1065 0%, #09090b 80%);
+        }
+
+        h1, h2 { margin: 8px 0; text-align: center; color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .active-screen { display: flex; flex-direction: column; align-items: center; }
+
+        /* MENÚ PRINCIPAL HALLOWEEN */
+        #header-menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        .candado-puerta { cursor: pointer; transition: transform 0.2s; }
+        .candado-puerta:hover { transform: scale(1.1); }
+        .oculto { display: none !important; }
+
+        .grid-juegos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .contenedor-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .etiqueta-codigo-menu {
+            font-size: 0.7em;
+            color: #34d399;
+            font-weight: bold;
+            height: 16px;
+            margin-bottom: 2px;
+        }
+
+        .cuadro-juego {
+            background-color: var(--box-bg);
+            border: 2px solid var(--accent-color);
+            padding: 8px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            position: relative;
+            font-size: 1.5em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+        }
+
+        .cuadro-juego:hover:not(.bloqueado) {
+            background-color: #2e1065;
+            transform: scale(1.03);
+        }
+
+        .cuadro-juego.bloqueado {
+            background-color: #1f1f23;
+            border-color: #3f3f46;
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+
+        .cuadro-juego.completado {
+            background-color: #1e3a8a;
+            border-color: #3b82f6;
+            cursor: pointer;
+            opacity: 0.9;
+        }
+
+        .cuadro-juego::after {
+            content: '🔒';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.4em;
+            color: var(--lock-color);
+        }
+
+        .cuadro-juego.desbloqueado::after { content: ''; }
+        .cuadro-juego.completado::after { content: '✔'; color: #38bdf8; font-size: 0.6em; }
+
+        .num-juego {
+            font-size: 0.35em;
+            position: absolute;
+            bottom: 2px;
+            left: 4px;
+            color: #a1a1aa;
+        }
+
+        /* ZONA INFERIOR / PANEL / COMPUTADORA */
+        .zona-inferior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            width: 100%;
+            gap: 10px;
+        }
+
+        #salida-puerta { font-size: 3em; cursor: pointer; filter: drop-shadow(0 0 8px #f59e0b); }
+        
+        .contenedor-computadora {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .etiqueta-codigo-compu {
+            font-size: 0.65em;
+            color: #f59e0b;
+            font-weight: bold;
+            height: 14px;
+        }
+        .icono-computadora { font-size: 2.5em; cursor: pointer; transition: transform 0.2s; filter: drop-shadow(0 0 8px #38bdf8); }
+        .icono-computadora:hover { transform: scale(1.1); }
+
+        .panel-principal-numerico {
+            background-color: var(--box-bg);
+            border: 2px solid var(--accent-color);
+            padding: 6px;
+            border-radius: 10px;
+            width: 110px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+        }
+
+        .pantalla-panel {
+            background: #000;
+            color: var(--success-color);
+            font-family: monospace;
+            height: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            font-size: 1em;
+            border: 1px solid #334155;
+        }
+
+        .teclado-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+        }
+
+        .t-btn {
+            background: #27272a;
+            border: none;
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .t-btn:active { background: #52525b; }
+        .t-btn.ok { background: var(--success-color); grid-column: span 2; font-weight: bold; }
+        .t-btn.borrar { background: #ef4444; font-weight: bold; }
+
+        /* BURBUJA DE MENSAJE */
+        .burbuja {
+            position: fixed;
+            bottom: 15px;
+            background: #18181b;
+            color: #f8fafc;
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 2px solid #7c3aed;
+            max-width: 280px;
+            display: none;
+            z-index: 1000;
+            font-size: 0.85em;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.6);
+        }
+
+        /* PANELES DE MINIJUEGOS */
+        .minijuego-panel {
+            background: rgba(9, 9, 11, 0.97);
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .mg-btn-salir { background: #ef4444; margin-top: 15px; padding: 8px 20px; border-radius: 5px; border:none; color:white; cursor:pointer; font-weight: bold;}
+
+        .circulo-col { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; display:inline-block; margin: 3px; box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+        [data-color='red'] { background: #ef4444; }
+        [data-color='yellow'] { background: #f59e0b; }
+        [data-color='brown'] { background: #92400e; }
+        [data-color='blue'] { background: #3b82f6; }
+        [data-color='black'] { background: #111827; border-color: #6b7280; }
+        [data-color='white'] { background: #f8fafc; }
+        [data-color='green'] { background: #10b981; }
+        [data-color='orange'] { background: #f97316; }
+
+        .laberinto-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 32px);
+            grid-template-rows: repeat(8, 32px);
+            gap: 2px;
+            background: #090d16;
+            border: 3px solid #7c3aed;
+            padding: 5px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+        }
+        .lab-celda {
+            width: 32px; height: 32px;
+            background: #1e1e24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            border-radius: 4px;
+        }
+        .lab-pared { background: #0f0f13; border: 1px dashed #27272a; }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ PRINCIPAL (ZONA 1) -->
+    <div id="pantalla-menu" class="screen active-screen">
+        <div id="header-menu">
+            <span>🎃</span>
+            <div class="candado-puerta" id="candado-digital" title="Candado Digital" onclick="intentarAbrirPuertaDigital()">🔒</div>
+            <div class="candado-puerta" id="candado-llave" title="Llave Física" onclick="intentarAbrirPuertaLlave()">🗝️</div>
+        </div>
+        
+        <h2>🦇 ESCAPE ROOM HALLOWEEN 🦇</h2>
+        
+        <div class="grid-juegos">
+            <!-- JUEGO 1 -->
+            <div class="contenedor-slot">
+                <div class="etiqueta-codigo-menu" id="lbl-c1"></div>
+                <div class="cuadro-juego desbloqueado" id="btn-juego-1" onclick="abrirMinijuego(1)"><span class="emoji-juego">🌈</span><span class="num-juego">1</span></div>
+            </div>
+            <!-- JUEGO 2 (Repetible) -->
+            <div class="contenedor-slot">
+                <div class="etiqueta-codigo-menu" id="lbl-c2"></div>
+                <div class="cuadro-juego desbloqueado" id="btn-juego-2" onclick="abrirMinijuego(2)"><span class="emoji-juego">🔢</span><span class="num-juego">2</span></div>
+            </div>
+            <!-- JUEGO 3 (Repetible) -->
+            <div class="contenedor-slot">
+                <div class="etiqueta-codigo-menu" id="lbl-c3"></div>
+                <div class="cuadro-juego desbloqueado" id="btn-juego-3" onclick="abrirMinijuego(3)"><span class="emoji-juego">🎨</span><span class="num-juego">3</span></div>
+            </div>
+            <!-- JUEGO 4 -->
+            <div class="contenedor-slot">
+                <div class="etiqueta-codigo-menu" id="lbl-c4"></div>
+                <div class="cuadro-juego bloqueado" id="btn-juego-4" onclick="abrirMinijuego(4)"><span class="emoji-juego">🛡️</span><span class="num-juego">4</span></div>
+            </div>
+            <!-- JUEGO 5 -->
+            <div class="contenedor-slot">
+                <div class="etiqueta-codigo-menu" id="lbl-c5"></div>
+                <div class="cuadro-juego bloqueado" id="btn-juego-5" onclick="abrirMinijuego(5)"><span class="emoji-juego">❓</span><span class="num-juego">5</span></div>
+            </div>
+            <!-- JUEGO 6 (Circo) -->
+            <div class="contenedor-slot">
+                <div class="etiqueta-codigo-menu" id="lbl-c6"></div>
+                <div class="cuadro-juego bloqueado" id="btn-juego-6" onclick="abrirMinijuego(6)"><span class="emoji-juego">🎪</span><span class="num-juego">6</span></div>
+            </div>
+        </div>
+
+        <div class="zona-inferior">
+            <div id="salida-puerta" onclick="tocarPuertaSalida()">🚪</div>
+            
+            <div class="contenedor-computadora">
+                <div class="etiqueta-codigo-compu" id="lbl-compu-secreto"></div>
+                <div class="icono-computadora" onclick="tocarComputadora()" title="Computadora de Halloween (💻)">💻</div>
+            </div>
+
+            <!-- Panel Numérico del Menú -->
+            <div class="panel-principal-numerico">
+                <div class="pantalla-panel" id="panel-pantalla">----</div>
+                <div class="teclado-grid">
+                    <button class="t-btn" onclick="panelTipear('1')">1</button>
+                    <button class="t-btn" onclick="panelTipear('2')">2</button>
+                    <button class="t-btn" onclick="panelTipear('3')">3</button>
+                    <button class="t-btn" onclick="panelTipear('4')">4</button>
+                    <button class="t-btn" onclick="panelTipear('5')">5</button>
+                    <button class="t-btn" onclick="panelTipear('6')">6</button>
+                    <button class="t-btn" onclick="panelTipear('7')">7</button>
+                    <button class="t-btn" onclick="panelTipear('8')">8</button>
+                    <button class="t-btn" onclick="panelTipear('9')">9</button>
+                    <button class="t-btn borrar" onclick="panelTipear('BORRAR')">⌫</button>
+                    <button class="t-btn" onclick="panelTipear('0')">0</button>
+                    <button class="t-btn ok" onclick="panelTipear('OK')">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZONA SECRETA -->
+    <div id="pantalla-zona-secreta" class="screen">
+        <h2>🎰 Zona Secreta de Halloween 🦇</h2>
+        <div style="font-size: 0.85em; color: #38bdf8; margin-bottom: 5px;" id="contador-tickets-amarillos">🎟️ Tickets: 0</div>
+        <div style="font-size: 0.9em; margin-bottom: 10px;" id="contador-digitos-secretos">Código Secreto: ###</div>
+        
+        <div style="background:#18181b; border: 2px solid #7c3aed; padding:12px; border-radius:10px; width:100%; box-sizing:border-box; margin-bottom:10px;">
+            <p style="font-size:0.8em; margin:0 0 8px 0;">🎰 Gira la máquina con tus tickets:</p>
+            <button class="t-btn" style="background:#f59e0b; color:black; font-weight:bold; padding:8px 15px; font-size:1em;" onclick="girarMaquinaSecreta()">Girar Tragamonedas (1 🎟)</button>
+            <p id="maq-resultado" style="font-size:0.8em; margin-top:6px; color:#cbd5e1;">Presiona para probar tu suerte.</p>
+        </div>
+
+        <div style="background:#18181b; border: 2px solid #10b981; padding:10px; border-radius:10px; width:100%; box-sizing:border-box; margin-bottom:10px;">
+            <p style="font-size:0.8em; margin:0 0 5px 0;">📦 Tienda Especial (Caja de 5 artículos)</p>
+            <button class="t-btn" style="background:#10b981; color:white; font-weight:bold; padding:8px; width:100%;" onclick="comprarCajaSecreta()">Comprar Caja (3,000 Boletos 🎟️)</button>
+            <p id="tienda-mensaje" style="font-size:0.75em; margin-top:5px; color:#a5b1c2;"></p>
+        </div>
+
+        <button class="mg-btn-salir" style="background:#3b82f6;" onclick="salirZonaSecreta()">⬅️ Volver al Menú Principal</button>
+    </div>
+
+    <!-- BURBUJA DE MENSAJE -->
+    <div class="burbuja" id="burbuja-mensaje"></div>
+
+    <!-- MINIJUEGO 1 -->
+    <div id="mg-1" class="minijuego-panel">
+        <h3>🌈 Memoria Tenebrosa (25 Rondas)</h3>
+        <div id="mg1-estado" style="font-size: 1.1em; margin-bottom: 8px;">Ronda: 1/25</div>
+        <div id="mg1-pantalla" style="background:#18181b; border:2px solid #7c3aed; width:240px; height:65px; display:flex; align-items:center; justify-content:center; font-size:1.8em; border-radius:8px; margin-bottom:15px;">Observa</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:280px;">
+            <div class="circulo-col" data-color="green" onclick="mg1Tocar('green')"></div>
+            <div class="circulo-col" data-color="orange" onclick="mg1Tocar('orange')"></div>
+            <div class="circulo-col" data-color="blue" onclick="mg1Tocar('blue')"></div>
+            <div class="circulo-col" data-color="red" onclick="mg1Tocar('red')"></div>
+            <div class="circulo-col" data-color="yellow" onclick="mg1Tocar('yellow')"></div>
+            <div class="circulo-col" data-color="brown" onclick="mg1Tocar('brown')"></div>
+            <div class="circulo-col" data-color="black" onclick="mg1Tocar('black')"></div>
+        </div>
+        <button class="mg-btn-salir" onclick="cerrarMinijuegos()">Salir</button>
+    </div>
+
+    <!-- MINIJUEGO 2 -->
+    <div id="mg-2" class="minijuego-panel">
+        <h3>🔢 Desafío Matemático (Repetible)</h3>
+        <div id="mg2-ronda" style="font-size: 1em; color:#38bdf8; margin-bottom: 5px;">Ronda: 1/10</div>
+        <div id="mg2-operacion" style="font-size: 1.6em; background:#18181b; border:2px solid #7c3aed; padding:15px; border-radius:8px; margin:10px 0; width:250px;">500 - 320</div>
+        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
+            <input type="number" id="mg2-input" placeholder="Respuesta" style="padding:8px; font-size:1em; width:120px; text-align:center; border-radius:5px; border:none;">
+            <button class="t-btn ok" style="padding:8px 15px;" onclick="mg2Verificar()">Comprobar</button>
+        </div>
+        <button class="mg-btn-salir" onclick="cerrarMinijuegos()">Salir</button>
+    </div>
+
+    <!-- MINIJUEGO 3 -->
+    <div id="mg-3" class="minijuego-panel">
+        <h3>🎨 Laboratorio de Mezcla (Repetible)</h3>
+        <div id="mg3-instruccion" style="font-size: 0.85em; padding: 0 15px; color:#cbd5e1; margin-bottom: 10px;">Cargando acertijo...</div>
+        <div style="display:flex; gap:10px; justify-content:center; margin-bottom:12px;">
+            <div class="circulo-col" data-color="blue" onclick="mg3SeleccionarColor('blue')"></div>
+            <div class="circulo-col" data-color="yellow" onclick="mg3SeleccionarColor('yellow')"></div>
+            <div class="circulo-col" data-color="red" onclick="mg3SeleccionarColor('red')"></div>
+            <div class="circulo-col" data-color="white" onclick="mg3SeleccionarColor('white')"></div>
+            <div class="circulo-col" data-color="green" onclick="mg3SeleccionarColor('green')"></div>
+            <div class="circulo-col" data-color="brown" onclick="mg3SeleccionarColor('brown')"></div>
+            <div class="circulo-col" data-color="black" onclick="mg3SeleccionarColor('black')"></div>
+        </div>
+        <div style="font-size:0.9em; margin-bottom:5px;">Selección: <span id="mg3-seleccionados">Ninguno</span></div>
+        <button class="t-btn ok" style="padding:6px 15px; font-size:0.9em;" onclick="mg3ProbarMezcla()">Mezclar</button>
+        <button class="mg-btn-salir" onclick="cerrarMinijuegos()">Salir</button>
+    </div>
+
+    <!-- MINIJUEGO 4 -->
+    <div id="mg-4" class="minijuego-panel">
+        <h3>🛡️ Hackeo (Fase <span id="mg4-fase-num">1</span>/3)</h3>
+        <p style="font-size: 0.8em; margin: 2px 0;">Mueve el archivo 💾 hasta la salida 🏁 esquivando al virus 👾</p>
+        <div class="laberinto-grid" id="laberinto-container"></div>
+        <div style="display: grid; grid-template-columns: repeat(3, 45px); gap: 5px; margin-top: 5px;">
+            <div></div><button class="t-btn" style="padding:10px; font-size:1.2em;" onclick="moverJugadorLab('UP')">🔼</button><div></div>
+            <button class="t-btn" style="padding:10px; font-size:1.2em;" onclick="moverJugadorLab('LEFT')">◀️</button>
+            <button class="t-btn" style="padding:10px; font-size:1.2em;" onclick="moverJugadorLab('DOWN')">🔽</button>
+            <button class="t-btn" style="padding:10px; font-size:1.2em;" onclick="moverJugadorLab('RIGHT')">▶️</button>
+        </div>
+        <button class="mg-btn-salir" style="margin-top:10px;" onclick="cerrarMinijuegos()">Salir</button>
+    </div>
+
+    <!-- MINIJUEGO 5: ADIVINA EL NÚMERO (CON EFECTO BORROSO OSCURO Y CORTE INFERIOR) -->
+    <div id="mg-5" class="minijuego-panel">
+        <h3>❓ Adivina el Código Oculto</h3>
+        <p style="font-size: 0.85em; margin-bottom: 5px;">Fase <span id="mg5-fase">1</span>/5</p>
+        
+        <div style="background:#09090b; border:2px solid #7c3aed; width:220px; height:65px; position:relative; overflow:hidden; border-radius:8px; margin: 10px auto; box-shadow: inset 0 0 10px #000;">
+            <!-- Número con desenfoque extremo, sombra oscura y ocultamiento inferior -->
+            <div id="mg5-numero-oculto" style="font-size: 2.2em; font-weight:bold; position:absolute; top: -2px; width: 100%; text-align: center; letter-spacing: 4px; color: #a78bfa; filter: blur(3px) contrast(150%); opacity: 0.45; text-shadow: 0 0 5px #000, 0 0 8px #7c3aed;">2702</div>
+            <!-- Capa de bloqueo oscuro difuminado abajo -->
+            <div style="position:absolute; bottom:0; width:100%; height:35px; background: linear-gradient(to bottom, rgba(9,9,11,0.2), rgba(9,9,11,0.95)); border-top:1px dashed #7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.65em; color:#f59e0b; font-weight:bold; letter-spacing: 1px;">🔒 MITAD INFERIOR OCULTA</div>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+            <input type="text" id="mg5-input" placeholder="Código" style="padding:8px; font-size:1em; width:110px; text-align:center; border-radius:5px; border:none;">
+            <button class="t-btn ok" style="padding:8px 15px;" onclick="mg5Verificar()">Validar</button>
+        </div>
+        <button class="mg-btn-salir" onclick="cerrarMinijuegos()">Salir</button>
+    </div>
+
+    <!-- MINIJUEGO 6: CIRCO -->
+    <div id="mg-6" class="minijuego-panel">
+        <h3>🎪 Circo de Halloween (Repetible)</h3>
+        <div style="font-size: 0.85em; margin-bottom: 5px;">🎟️ Tickets: <b id="circo-tickets">0</b> | Tiempo: <b id="circo-tiempo">120</b>s</div>
+        
+        <div style="background:#18181b; width:300px; height:45px; border-radius:8px; position:relative; overflow:hidden; border:2px solid #7c3aed; margin:15px 0;">
+            <div id="barra-zona-verde" style="position:absolute; height:100%; background:rgba(16, 185, 129, 0.4); left:40px; width:60px;"></div>
+            <div id="barra-indicador" style="position:absolute; height:100%; background:#f8fafc; width:12px; left:0px;"></div>
+        </div>
+
+        <button class="t-btn ok" style="padding:15px 30px; font-size:1.1em; background:#f59e0b; color:black; font-weight:bold;" onmousedown="empezarPresionarBarra()" onmouseup="soltarPresionarBarra()" ontouchstart="empezarPresionarBarra()" ontouchend="soltarPresionarBarra()">¡MANTENER INFLANDO!</button>
+        <p style="font-size:0.75em; color:#a1a1aa; margin-top:8px;">Mantén presionado para atrapar la zona verde (+1 ticket cada 2s).</p>
+        
+        <button class="mg-btn-salir" onclick="cerrarMinijuegos()">Salir</button>
+    </div>
+
+    <script>
+        // --- ESTADO GLOBAL Y PERSISTENCIA ---
+        let juegoEstado = {
+            nivelesCompletados: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+            candadoDigitalAbierto: false,
+            llaveObtenida: false,
+            puertaAbierta: false,
+            ticketsAmarillos: 0,
+            secuenciaMezclaFase: 1,
+            premioSecretoDesbloqueado: false,
+            maquinaDigitos: [false, false, false],
+            maquinaLlaveObtenida: false,
+            cajaComprada: false
+        };
+
+        const codigosJuegos = { 1: '9', 2: '89', 3: '2', 4: '5221', 5: '2346', 6: 'CIRCO' };
+
+        window.addEventListener('load', () => {
+            let guardado = localStorage.getItem('escape_room_halloween_def_v3');
+            if (guardado) {
+                juegoEstado = JSON.parse(guardado);
+            }
+            sincronizarInterfazGeneral();
+        });
+
+        function guardarProgreso() {
+            localStorage.setItem('escape_room_halloween_def_v3', JSON.stringify(juegoEstado));
+        }
+
+        function sincronizarInterfazGeneral() {
+            for (let i = 1; i <= 6; i++) {
+                let cuadro = document.getElementById(`btn-juego-${i}`);
+                let lbl = document.getElementById(`lbl-c${i}`);
+                if (juegoEstado.nivelesCompletados[i]) {
+                    cuadro.classList.remove('bloqueado');
+                    cuadro.classList.add('completado');
+                    lbl.innerText = `Código: ${codigosJuegos[i]}`;
+                } else {
+                    if (i <= 3) {
+                        cuadro.classList.remove('bloqueado');
+                        cuadro.classList.add('desbloqueado');
+                    }
+                }
+            }
+
+            if (juegoEstado.candadoDigitalAbierto) {
+                document.getElementById('candado-digital').innerText = '🔓';
+            }
+            if (juegoEstado.llaveObtenida) {
+                document.getElementById('candado-llave').innerText = '🔑';
+            }
+
+            let tAm = document.getElementById('contador-tickets-amarillos');
+            if(tAm) tAm.innerText = `🎟 Tickets: ${juegoEstado.ticketsAmarillos}`;
+
+            let lblCompu = document.getElementById('lbl-compu-secreto');
+            if(lblCompu) {
+                lblCompu.innerText = juegoEstado.premioSecretoDesbloqueado ? "Cod: 6173" : "";
+            }
+
+            let cSec = document.getElementById('contador-digitos-secretos');
+            if(cSec) {
+                let d1 = juegoEstado.maquinaDigitos[0] ? '3' : '#';
+                let d2 = juegoEstado.maquinaDigitos[1] ? '2' : '#';
+                let d3 = juegoEstado.maquinaDigitos[2] ? '7' : '#';
+                let l = juegoEstado.maquinaLlaveObtenida ? ' + 🗝️' : '';
+                cSec.innerText = `Código Secreto: ${d1}${d2}${d3}${l}`;
+            }
+
+            let tMsg = document.getElementById('tienda-mensaje');
+            if(tMsg) {
+                if(juegoEstado.cajaComprada) tMsg.innerText = "Ya has comprado la caja.";
+            }
+        }
+
+        function mostrarBurbuja(texto, duracion = 3500) {
+            const burbuja = document.getElementById('burbuja-mensaje');
+            burbuja.innerText = texto;
+            burbuja.style.display = 'block';
+            setTimeout(() => { burbuja.style.display = 'none'; }, duracion);
+        }
+
+        function cerrarMinijuegos() {
+            document.querySelectorAll('.minijuego-panel').forEach(p => p.style.display = 'none');
+            if (window.intervaloLaberinto) clearInterval(window.intervaloLaberinto);
+            if (window.intervaloBarraCirco) clearInterval(window.intervaloBarraCirco);
+        }
+
+        function abrirMinijuego(num) {
+            let cuadroEl = document.getElementById(`btn-juego-${num}`);
+            if (cuadroEl.classList.contains('bloqueado')) {
+                mostrarBurbuja("Este minijuego está bloqueado. Introduce el código correcto en el panel numérico.");
+                return;
+            }
+            if (juegoEstado.nivelesCompletados[num] && num !== 2 && num !== 3 && num !== 6) {
+                mostrarBurbuja(`Este nivel ya fue completado y bloqueado. Código: ${codigosJuegos[num]}`);
+                return;
+            }
+
+            cerrarMinijuegos();
+            document.getElementById(`mg-${num}`).style.display = 'flex';
+
+            if (num === 1) iniciarMG1();
+            if (num === 2) iniciarMG2();
+            if (num === 3) iniciarMG3();
+            if (num === 4) iniciarMG4();
+            if (num === 5) iniciarMG5();
+            if (num === 6) iniciarMG6();
+        }
+
+        // --- PANEL NUMÉRICO ---
+        let codigoInput = "";
+        const panelPantalla = document.getElementById('panel-pantalla');
+
+        function panelTipear(tecla) {
+            if (tecla === 'OK') {
+                verificarCodigoPanel();
+            } else if (tecla === 'BORRAR') {
+                codigoInput = "";
+            } else {
+                if (codigoInput.length < 15) codigoInput += tecla;
+            }
+            panelPantalla.innerText = codigoInput.padStart(4, '-');
+        }
+
+        function verificarCodigoPanel() {
+            if (codigoInput === "9892") {
+                document.getElementById('btn-juego-4').classList.remove('bloqueado');
+                document.getElementById('btn-juego-4').classList.add('desbloqueado');
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                mostrarBurbuja("🔓 ¡Código 9892 correcto! Hackeo desbloqueado.");
+            } else if (codigoInput === "5221") {
+                document.getElementById('btn-juego-5').classList.remove('bloqueado');
+                document.getElementById('btn-juego-5').classList.add('desbloqueado');
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                mostrarBurbuja("🔓 ¡Código 5221 correcto! Adivinanza desbloqueada.");
+            } else if (codigoInput === "2346") {
+                document.getElementById('btn-juego-6').classList.remove('bloqueado');
+                document.getElementById('btn-juego-6').classList.add('desbloqueado');
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                mostrarBurbuja("🔓 ¡Código 2346 correcto! Circo desbloqueado.");
+            } else if (codigoInput === "327") {
+                juegoEstado.candadoDigitalAbierto = true;
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                mostrarBurbuja("🔓 ¡Candado digital abierto!");
+            } else {
+                mostrarBurbuja("Código incorrecto.");
+            }
+            codigoInput = "";
+            panelPantalla.innerText = "----";
+        }
+
+        function intentarAbrirPuertaDigital() {
+            if (!juegoEstado.candadoDigitalAbierto) mostrarBurbuja("Requiere el código 327 en el panel numérico.");
+            else mostrarBurbuja("El candado digital ya está abierto.");
+        }
+
+        function intentarAbrirPuertaLlave() {
+            if (juegoEstado.llaveObtenida) {
+                juegoEstado.puertaAbierta = true;
+                guardarProgreso();
+                mostrarBurbuja("🎉 ¡Has abierto ambos candados! ¡GANASTE EL JUEGO Y TU CARAMELO X1! 🍬", 7000);
+            } else {
+                mostrarBurbuja("La llave física está bloqueada. Consíguela en la zona secreta.");
+            }
+        }
+
+        function tocarPuertaSalida() {
+            if (juegoEstado.candadoDigitalAbierto && juegoEstado.llaveObtenida) intentarAbrirPuertaLlave();
+            else mostrarBurbuja("La puerta tiene 2 candados: uno digital y una llave física.");
+        }
+
+        function tocarComputadora() {
+            let inputComp = prompt("💻 [COMPUTADORA HALLOWEEN]\nIntroduce el código de acceso:");
+            if (inputComp === "6173") {
+                document.getElementById('pantalla-menu').classList.remove('active-screen');
+                document.getElementById('pantalla-zona-secreta').classList.add('active-screen');
+                sincronizarInterfazGeneral();
+            } else if (inputComp !== null) {
+                alert("Código de computadora incorrecto.");
+            }
+        }
+
+        function salirZonaSecreta() {
+            document.getElementById('pantalla-zona-secreta').classList.remove('active-screen');
+            document.getElementById('pantalla-menu').classList.add('active-screen');
+        }
+
+        function girarMaquinaSecreta() {
+            if (juegoEstado.ticketsAmarillos > 0) {
+                juegoEstado.ticketsAmarillos--;
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+
+                let roll = Math.random();
+                if (roll < 0.10) {
+                    if (!juegoEstado.maquinaDigitos[0]) {
+                        juegoEstado.maquinaDigitos[0] = true;
+                        document.getElementById('maq-resultado').innerHTML = "🎉 ¡Ganaste el dígito <b>3</b>!";
+                    } else if (!juegoEstado.maquinaDigitos[1]) {
+                        juegoEstado.maquinaDigitos[1] = true;
+                        document.getElementById('maq-resultado').innerHTML = "🎉 ¡Ganaste el dígito <b>2</b>!";
+                    } else if (!juegoEstado.maquinaDigitos[2]) {
+                        juegoEstado.maquinaDigitos[2] = true;
+                        document.getElementById('maq-resultado').innerHTML = "🎉 ¡Ganaste el dígito <b>7</b>!";
+                    } else if (!juegoEstado.maquinaLlaveObtenida) {
+                        juegoEstado.maquinaLlaveObtenida = true;
+                        juegoEstado.llaveObtenida = true;
+                        document.getElementById('maq-resultado').innerHTML = "🗝️ ¡GANASTE LA LLAVE FÍSICA!";
+                        mostrarBurbuja("¡Has conseguido la llave física!");
+                    } else {
+                        document.getElementById('maq-resultado').innerText = "Premio menor.";
+                    }
+                } else {
+                    document.getElementById('maq-resultado').innerText = "Nada (90% fallo). Sigue intentando.";
+                }
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+            } else {
+                mostrarBurbuja("No tienes tickets. Juega en el circo para ganar más.");
+            }
+        }  
+      
+        function comprarCajaSecreta() {
+            if (juegoEstado.cajaComprada) {
+                alert("Ya has comprado la caja.");
+                return;
+            }
+            if (juegoEstado.ticketsAmarillos >= 3000) {
+                juegoEstado.ticketsAmarillos -= 3000;
+                juegoEstado.cajaComprada = true;
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                alert("¡Compraste la caja de 5 artículos ve con Alex!");
+            } else {
+                alert("Necesitas 3,000 boletos/tickets para comprar la caja.");
+            }
+        }
+
+        // --- MINIJUEGO 1: MEMORIA ---
+        let mg1Ronda = 1;
+        let mg1Paso = 0;
+        let mg1Bloqueo = true;
+        let mg1SecuenciaActual = [];
+        const patronMaster25 = [
+            ['red'], ['red','yellow'], ['red','yellow','brown'], ['red','yellow','brown','blue'],
+            ['red','yellow','brown','blue','black'], ['red','yellow','brown','blue','black','brown'],
+            ['red','yellow','brown','blue','black','brown','white'], ['red','yellow','brown','blue','black','brown','white','red'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue'], ['red','yellow','brown','blue','black','brown','white','red','blue','white'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red','red'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red','red','yellow'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red','red','yellow'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red','red','yellow','yellow'], ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red','red','yellow','yellow','blue'],
+            ['red','yellow','brown','blue','black','brown','white','red','blue','white','black','black','brown','yellow','red','blue','yellow','white','red','red','yellow','yellow','blue','white']
+        ];
+
+        function iniciarMG1() {
+            mg1Ronda = 1;
+            mg1IniciarRonda();
+        }
+
+        function mg1IniciarRonda() {
+            mg1Paso = 0;
+            mg1Bloqueo = true;
+            document.getElementById('mg1-estado').innerText = `Ronda: ${mg1Ronda}/25`;
+            mg1SecuenciaActual = patronMaster25[mg1Ronda - 1];
+            
+            let i = 0;
+            let inter = setInterval(() => {
+                document.getElementById('mg1-pantalla').innerHTML = `<div class="circulo-col" data-color="${mg1SecuenciaActual[i]}" style="width:30px; height:30px;"></div>`;
+                i++;
+                if (i >= mg1SecuenciaActual.length) {
+                    clearInterval(inter);
+                    setTimeout(() => {
+                        document.getElementById('mg1-pantalla').innerHTML = "¡Tu turno!";
+                        mg1Bloqueo = false;
+                    }, 500);
+                }
+            }, 600);
+        }
+
+        function mg1Tocar(col) {
+            if (mg1Bloqueo) return;
+            if (col === mg1SecuenciaActual[mg1Paso]) {
+                mg1Paso++;
+                if (mg1Paso === mg1SecuenciaActual.length) {
+                    mg1Ronda++;
+                    if (mg1Ronda <= 25) {
+                        document.getElementById('mg1-pantalla').innerHTML = "✅ ¡Correcto!";
+                        mg1Bloqueo = true;
+                        setTimeout(mg1IniciarRonda, 900);
+                    } else {
+                        juegoEstado.nivelesCompletados[1] = true;
+                        sincronizarInterfazGeneral();
+                        guardarProgreso();
+                        mostrarBurbuja("🏆 ¡Memoria superada! Código: 9");
+                        cerrarMinijuegos();
+                    }
+                }
+            } else {
+                mg1Ronda = Math.max(1, mg1Ronda - 2);
+                document.getElementById('mg1-pantalla').innerHTML = "❌ ¡Error (-2 rondas)!";
+                mg1Bloqueo = true;
+                mostrarBurbuja(`Fallaste. Retrocedes a la ronda ${mg1Ronda}`);
+                setTimeout(mg1IniciarRonda, 1200);
+            }
+        }
+
+        // --- MINIJUEGO 2: MATEMÁTICAS ---
+        let mg2Idx = 0;
+        const listaMatematicas = [
+            { op: "500 - 320", r: 180 }, { op: "700 - 460", r: 240 },
+            { op: "500 - 700", r: -200 }, { op: "980 - 900", r: 80 },
+            { op: "789 - 673", r: 116 }, { op: "896 - 217", r: 679 },
+            { op: "546 - 419", r: 127 }, { op: "10 - 7", r: 3 },
+            { op: "167 - 200", r: -33 }, { op: "900 - 15 - 626", r: 259 }
+        ];
+
+        function iniciarMG2() {
+            mg2Idx = 0;
+            siguienteMatematica();
+        }
+
+        function siguienteMatematica() {
+            if (mg2Idx < 10) {
+                document.getElementById('mg2-ronda').innerText = `Ronda: ${mg2Idx + 1}/10`;
+                document.getElementById('mg2-operacion').innerText = listaMatematicas[mg2Idx].op;
+                document.getElementById('mg2-input').value = "";
+            } else {
+                juegoEstado.nivelesCompletados[2] = true;
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                mostrarBurbuja("🏆 ¡Matemáticas completadas! Código: 89");
+            }
+        }
+
+        function mg2Verificar() {
+            let val = parseInt(document.getElementById('mg2-input').value);
+            if (val === listaMatematicas[mg2Idx].r) {
+                mg2Idx++;
+                siguienteMatematica();
+            } else {
+                mostrarBurbuja("Respuesta incorrecta.");
+            }
+        }
+
+        // --- MINIJUEGO 3: MEZCLA ---
+        let mg3ColoresSel = [];
+        function iniciarMG3() {
+            actualizarTextoMezcla();
+        }
+
+        function actualizarTextoMezcla() {
+            let txt = "";
+            if (juegoEstado.secuenciaMezclaFase === 1) txt = "🧩 R1: El hermoso jardín trae alegría! Míralo bien y verás el color que brilla!";
+            else if (juegoEstado.secuenciaMezclaFase === 2) txt = "🧩 R2: Oscuro del total Pero en la naturaleza se ve es lo que más hay sostiene lo verde y sirve para el calor!";
+            else if (juegoEstado.secuenciaMezclaFase === 3) txt = "🧩 R3: En el jardín también esta para decorar comienza con F pero el color que buscas es la que se usa con rojo pero no es su valiente";
+            else txt = "🧪 [Laboratorio Abierto] Mezcla libremente colores para descubrir secretos ocultos.";
+            
+            document.getElementById('mg3-instruccion').innerText = txt;
+            mg3ColoresSel = [];
+            document.getElementById('mg3-seleccionados').innerText = "Ninguno";
+        }
+
+        function mg3SeleccionarColor(col) {
+            if (mg3ColoresSel.length < 2) {
+                mg3ColoresSel.push(col);
+                document.getElementById('mg3-seleccionados').innerText = mg3ColoresSel.join(' + ');
+            }
+        }
+
+        function mg3ProbarMezcla() {
+            let s = mg3ColoresSel.sort().join('+');
+            if (juegoEstado.secuenciaMezclaFase === 1 && s === 'blue+yellow') {
+                juegoEstado.secuenciaMezclaFase = 2;
+                mostrarBurbuja("¡Correcto!");
+                actualizarTextoMezcla();
+            } else if (juegoEstado.secuenciaMezclaFase === 2 && s === 'green+red') {
+                juegoEstado.secuenciaMezclaFase = 3;
+                mostrarBurbuja("¡Correcto!");
+                actualizarTextoMezcla();
+            } else if (juegoEstado.secuenciaMezclaFase === 3 && s === 'red+white') {
+                juegoEstado.secuenciaMezclaFase = 4;
+                juegoEstado.nivelesCompletados[3] = true;
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                mostrarBurbuja("🏆 ¡Mezcla completada! Código: 2");
+                actualizarTextoMezcla();
+            } else if (s === 'brown+yellow' || s === 'yellow+brown') {
+                juegoEstado.premioSecretoDesbloqueado = true;
+                sincronizarInterfazGeneral();
+                guardarProgreso();
+                alert("✨ ¡Has descubierto el secreto! El código 6173 apareció arriba de la computadora (💻).");
+            } else {
+                mostrarBurbuja("Combinación incorrecta.");
+                mg3ColoresSel = [];
+                document.getElementById('mg3-seleccionados').innerText = "Ninguno";
+            }
+        }
+
+        // --- MINIJUEGO 4: HACKEO ---
+        let labFase = 1;
+        let labJugadorX = 0, labJugadorY = 0;
+        let labVirusX = 7, labVirusY = 7;
+        let labSalidaX = 7, labSalidaY = 7;
+        let mapaLaberinto = [];
+        const mapasDefinidos = {
+            1: [[0,0,1,0,0,0,0,0],[0,0,1,0,1,1,1,0],[0,0,0,0,1,0,0,0],[1,1,1,0,1,0,1,1],[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,0],[0,0,0,0,0,0,1,0],[1,1,1,1,1,0,0,0]],
+            2: [[0,0,0,1,0,0,0,0],[1,1,0,1,0,1,1,0],[0,0,0,0,0,1,0,0],[0,1,1,1,0,1,0,1],[0,0,0,1,0,0,0,1],[1,1,0,1,1,1,0,1],[0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,0]],
+            3: [[0,1,0,0,0,1,0,0],[0,1,0,1,0,1,0,1],[0,0,0,1,0,0,0,1],[1,1,0,1,1,1,0,1],[0,0,0,0,0,1,0,0],[0,1,1,1,0,1,1,0],[0,0,0,1,0,0,0,0],[1,1,0,0,0,1,1,0]]
+        };
+
+        function iniciarMG4() {
+            labFase = 1;
+            cargarFaseLaberinto();
+        }
+
+        function cargarFaseLaberinto() {
+            document.getElementById('mg4-fase-num').innerText = labFase;
+            mapaLaberinto = JSON.parse(JSON.stringify(mapasDefinidos[labFase]));
+            labJugadorX = 0; labJugadorY = 0;
+            labVirusX = 7; labVirusY = 7;
+            renderLaberinto();
+
+            if (window.intervaloLaberinto) clearInterval(window.intervaloLaberinto);
+            let velocidadVirus = labFase === 1 ? 2000 : (labFase === 2 ? 1400 : 900);
+            window.intervaloLaberinto = setInterval(moverVirusLab, velocidadVirus);
+        }
+
+        function renderLaberinto() {
+            const cont = document.getElementById('laberinto-container');
+            cont.innerHTML = '';
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    let cel = document.createElement('div');
+                    cel.className = 'lab-celda';
+                    if (mapaLaberinto[y][x] === 1) cel.classList.add('lab-pared');
+                    if (x === labJugadorX && y === labJugadorY) cel.innerHTML = '💾';
+                    else if (x === labVirusX && y === labVirusY) cel.innerHTML = '👾';
+                    else if (x === labSalidaX && y === labSalidaY) cel.innerHTML = '🏁';
+                    cont.appendChild(cel);
+                }
+            }
+        }
+
+        function moverJugadorLab(dir) {
+            let nx = labJugadorX, ny = labJugadorY;
+            if (dir === 'UP') ny--;
+            if (dir === 'DOWN') ny++;
+            if (dir === 'LEFT') nx--;
+            if (dir === 'RIGHT') nx++;
+
+            if (nx >= 0 && nx < 8 && ny >= 0 && ny < 8 && mapaLaberinto[ny][nx] === 0) {
+                labJugadorX = nx;
+                labJugadorY = ny;
+                chequearColisionLab();
+                renderLaberinto();
+            }
+        }
+
+        function moverVirusLab() {
+            if (labVirusX < labJugadorX) labVirusX++;
+            else if (labVirusX > labJugadorX) labVirusX--;
+            if (labVirusY < labJugadorY) labVirusY++;
+            else if (labVirusY > labJugadorY) labVirusY--;
+            chequearColisionLab();
+            renderLaberinto();
+        }
+
+        function chequearColisionLab() {
+            if (labJugadorX === labVirusX && labJugadorY === labVirusY) {
+                mostrarBurbuja("❌ ¡El virus te atrapó! Reiniciando fase 1.");
+                labFase = 1;
+                cargarFaseLaberinto();
+            } else if (labJugadorX === labSalidaX && labJugadorY === labSalidaY) {
+                if (labFase < 3) {
+                    labFase++;
+                    mostrarBurbuja(`¡Fase ${labFase - 1} superada!`);
+                    cargarFaseLaberinto();
+                } else {
+                    clearInterval(window.intervaloLaberinto);
+                    juegoEstado.nivelesCompletados[4] = true;
+                    sincronizarInterfazGeneral();
+                    guardarProgreso();
+                    mostrarBurbuja("🏆 ¡Hackeo completado! Código: 5221");
+                    cerrarMinijuegos();
+                }
+            }
+        }
+
+        // --- MINIJUEGO 5: ADIVINA NÚMERO ---
+        let mg5RondaActual = 1;
+        const clavesMag5 = ["2702", "8099", "0122", "6698", "9235"];
+
+        function iniciarMG5() {
+            mg5RondaActual = 1;
+            actualizarMG5UI();
+        }
+
+        function actualizarMG5UI() {
+            document.getElementById('mg5-fase').innerText = mg5RondaActual;
+            document.getElementById('mg5-numero-oculto').innerText = clavesMag5[mg5RondaActual - 1];
+            document.getElementById('mg5-input').value = "";
+        }
+
+        function mg5Verificar() {
+            let val = document.getElementById('mg5-input').value.trim();
+            if (val === clavesMag5[mg5RondaActual - 1]) {
+                mg5RondaActual++;
+                if (mg5RondaActual <= 5) {
+                    actualizarMG5UI();
+                    mostrarBurbuja("¡Correcto!");
+                } else {
+                    juegoEstado.nivelesCompletados[5] = true;
+                    sincronizarInterfazGeneral();
+                    guardarProgreso();
+                    mostrarBurbuja("🏆 ¡Adivinanza superada! Código: 2346");
+                    cerrarMinijuegos();
+                }
+            } else {
+                mostrarBurbuja("Código incorrecto.");
+            }
+        }
+
+        // --- MINIJUEGO 6: CIRCO ---
+        let circoTiempo = 120;
+        let indicadorX = 0;
+        let zonaVerdeInicio = 40;
+        let presionandoBoton = false;
+
+        function iniciarMG6() {
+            circoTiempo = 120;
+            document.getElementById('circo-tickets').innerText = juegoEstado.ticketsAmarillos;
+            document.getElementById('circo-tiempo').innerText = circoTiempo;
+
+            if (window.intervaloBarraCirco) clearInterval(window.intervaloBarraCirco);
+            window.intervaloBarraCirco = setInterval(bucleJuegoCirco, 50);
+
+            if (window.intervaloZonaVerde) clearInterval(window.intervaloZonaVerde);
+            window.intervaloZonaVerde = setInterval(() => {
+                zonaVerdeInicio = Math.floor(Math.random() * 200);
+                let zV = document.getElementById('barra-zona-verde');
+                if(zV) zV.style.left = zonaVerdeInicio + 'px';
+            }, 4000);
+
+            if (window.intervaloTicketCirco) clearInterval(window.intervaloTicketCirco);
+            window.intervaloTicketCirco = setInterval(() => {
+                if (presionandoBoton) {
+                    let ind = indicadorX;
+                    if (ind >= zonaVerdeInicio && ind <= zonaVerdeInicio + 60) {
+                        juegoEstado.ticketsAmarillos++;
+                        document.getElementById('circo-tickets').innerText = juegoEstado.ticketsAmarillos;
+                        sincronizarInterfazGeneral();
+                        guardarProgreso();
+                    }
+                }
+            }, 2000);
+
+            if (window.intervaloTiempoCirco) clearInterval(window.intervaloTiempoCirco);
+            window.intervaloTiempoCirco = setInterval(() => {
+                circoTiempo--;
+                let cT = document.getElementById('circo-tiempo');
+                if(cT) cT.innerText = circoTiempo;
+                if (circoTiempo <= 0) cerrarMinijuegos();
+            }, 1000);
+
+            juegoEstado.nivelesCompletados[6] = true;
+            sincronizarInterfazGeneral();
+            guardarProgreso();
+        }
+
+        function empezarPresionarBarra() { presionandoBoton = true; }
+        function soltarPresionarBarra() { presionandoBoton = false; }
+
+        function bucleJuegoCirco() {
+            if (presionandoBoton) indicadorX -= 4;
+            else indicadorX += 4;
+            if (indicadorX < 0) indicadorX = 0;
+            if (indicadorX > 288) indicadorX = 288;
+            let indEl = document.getElementById('barra-indicador');
+            if(indEl) indEl.style.left = indicadorX + 'px';
+        }
+    </script>
+</body>
+</html>
